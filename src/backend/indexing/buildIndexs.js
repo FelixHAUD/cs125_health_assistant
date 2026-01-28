@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { estimateNutrition, calorieBucket, proteinBucket, inferDietaryTags, inferMealType, prepTimeBucket, costBucket } from "./indexUtils.js";
 
 // ---- Load recipes ----
 const dataDir = path.resolve("src/backend/json");
@@ -46,75 +47,6 @@ const indexes = {
 };
 
 
-// ---- Helpers ----
-function inferMealType(title) {
-  const t = title.toLowerCase();
-  if (t.includes("breakfast")) return "breakfast";
-  if (t.includes("salad") || t.includes("sandwich")) return "lunch";
-  return "dinner"; // default
-}
-
-function inferDietaryTags(ingredientsText) {
-  const text = ingredientsText.toLowerCase();
-  const tags = [];
-
-  const hasMeat =
-    text.includes("chicken") ||
-    text.includes("beef") ||
-    text.includes("pork") ||
-    text.includes("turkey");
-
-  if (!hasMeat) tags.push("vegetarian");
-  if (hasMeat) tags.push("high_protein");
-  if (!text.includes("flour") && !text.includes("bread")) tags.push("gluten_free");
-
-  return tags;
-}
-
-function costBucket(ingredientCount) {
-  if (ingredientCount <= 6) return "cheap";
-  if (ingredientCount <= 12) return "moderate";
-  return "expensive";
-}
-
-function prepTimeBucket(instructionLength) {
-  if (instructionLength < 500) return "quick";
-  if (instructionLength < 1200) return "medium";
-  return "long";
-}
-function calorieBucket(cals) {
-  if (cals < 400) return "low";
-  if (cals < 700) return "medium";
-  return "high";
-}
-
-function proteinBucket(protein) {
-  if (protein < 10) return "low";
-  if (protein < 30) return "medium";
-  return "high";
-}
-
-function estimateNutrition(ingredientsText) {
-  let totalCalories = 0;
-  let totalProtein = 0;
-
-  const text = ingredientsText.toLowerCase();
-
-  Object.entries(nutritionByFoodName).forEach(([food, values]) => {
-    if (text.includes(food)) {
-      if (values.calories) totalCalories += values.calories;
-      if (values.protein) totalProtein += values.protein;
-    }
-  });
-
-  if (totalCalories === 0 && totalProtein === 0) return null;
-
-  return {
-    calories: Math.round(totalCalories),
-    protein: Math.round(totalProtein)
-  };
-}
-
 // ---- Build indexes ----
 recipes.forEach(recipe => {
   const id = String(recipe.id);
@@ -152,7 +84,7 @@ recipes.forEach(recipe => {
   indexes.prepTimeBucket[prep] ??= [];
   indexes.prepTimeBucket[prep].push(id);
 
-  const estimatedNutrition = estimateNutrition(recipe.Ingredients);
+  const estimatedNutrition = estimateNutrition(recipe.Ingredients, nutritionByFoodName);
 
   if (estimatedNutrition) {
     indexes.recipeById[id].calories = estimatedNutrition.calories;

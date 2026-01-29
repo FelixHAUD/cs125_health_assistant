@@ -114,3 +114,24 @@ export function prepTimeBucket(instructionLength) {
   if (instructionLength < 1200) return "medium";
   return "long";
 }
+/**
+ * Estimates total recipe cost based on ingredient matches.
+ *
+ * @param {string} ingredientsText 
+ * @param {{ [foodName: string]: number }} priceLookup 
+ * @returns {number | null} 
+ */
+export function estimateRecipeCost(ingredientsText, priceLookup) {
+  let totalCost = 0;
+  const text = ingredientsText.toLowerCase();
+
+  Object.entries(priceLookup).forEach(([food, price]) => {
+    if (text.includes(food)) {
+      totalCost += price;
+    }
+  });
+
+  if (totalCost === 0) return null;
+
+  return Number(totalCost.toFixed(2));
+}

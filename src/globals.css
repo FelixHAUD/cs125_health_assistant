@@ -43,8 +43,8 @@ body {
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 2.5rem;
+  line-height: 1;
 }
 
 footer {
@@ -63,7 +63,7 @@ main {
   text-align: left;
 }
 
-/* button {
+button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -80,7 +80,13 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-} */
+}
+
+.subtitle {
+  color: #666666;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
 
 /* @media (prefers-color-scheme: light) {
   :root {
@@ -94,3 +100,38 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
+
+/* Dashboard */
+
+.db-name {
+  font-size: 2rem;
+}
+
+/* Profile */
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  & > .info-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    & input {
+      /* background-color: inherit; */
+      background-color: lightgray;
+      color: inherit;
+      border-radius: 0.25rem;
+      /* border: 1px solid gray; */
+      border: none;
+      font-size: 15px;
+      font-family: inherit;
+      width: 40px;
+    }
+    & > span {
+      display: flex;
+      gap: 0.25rem;
+      align-items: center;
+    }
+  }
+}

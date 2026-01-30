@@ -24,9 +24,9 @@ function Dashboard() {
   return (
     <main>
       <h1>Dashboard</h1>
-      <p>Welcome, [name]</p>
-      <p>It is {time} on {today}.</p>
-      <p>Your recommended meal is {breakfastRecipes[0]?.title}, to be had for breakfast tomorrow morning.</p>
+      <span className="db-name">Welcome, [name]!</span>
+      <p>It is <b>{time}</b> on <b>{today}</b>.</p>
+      <p>Your recommended meal is {breakfastRecipes[0]?.title}, to be had for [breakfast tomorrow morning].</p>
     </main>
   )
 }

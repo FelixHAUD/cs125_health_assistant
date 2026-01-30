@@ -12,7 +12,7 @@ import {
 } from "./indexUtils.js";
 
 // ---- Load recipes ----
-const dataDir = path.resolve("src/backend/json");
+const dataDir = path.resolve("json");
 
 const recipesPath = path.join(dataDir, "recipes.json");
 const nutritionPath = path.join(dataDir, "nutrition.json");
@@ -124,7 +124,7 @@ recipes.forEach((recipe) => {
 });
 
 // ---- Write indexes ----
-const outputPath = path.resolve("src/backend/indexing/indexes.json");
+const outputPath = path.resolve("indexing/indexes.json");
 fs.writeFileSync(outputPath, JSON.stringify(indexes, null, 2));
 
 console.log("Indexes built successfully from raw recipe JSON!");

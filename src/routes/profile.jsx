@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuHeartPulse } from "react-icons/lu";
 import { MdBloodtype } from "react-icons/md";
 import { GiFat } from "react-icons/gi";
+import toast from "react-hot-toast";
 
 const GOAL_OPTIONS = [
   "I want to lose weight and become more lean.",
@@ -28,6 +29,28 @@ function Profile() {
     bfPct: 15.6
   });
 
+  // State for saving status
+  const [saving, setSaving] = useState(false);
+
+  // Load in user profile
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data?.user) {
+          setUser({
+            ...data.user,
+            goal: data.user.goal || (data.goalOptions?.[0] ?? GOAL_OPTIONS[0])
+          });
+        }
+        if (data?.vitals) setVitals(data.vitals);
+      })
+      .catch((e) => console.error("Fetch /api/profile failed:", e));
+  }, []);
+
   // Helper function to handle changes for basic info
   const handleUserChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +61,40 @@ function Profile() {
   const handleVitalChange = (e) => {
     const { name, value } = e.target;
     setVitals((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Helper function handle changes for vitals
+  const handleGoalChange = (e) => {
+    setUser((prev) => ({ ...prev, goal: e.target.value }));
+  };
+
+  //Save changes to json
+  const handleSave = () => {
+    setSaving(true);
+
+    const payload = {
+      user: { ...user, goal: user.goal || GOAL_OPTIONS[0] },
+      vitals,
+      goalOptions: GOAL_OPTIONS
+    };
+
+    fetch("/api/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(() => {
+        toast.success("Profile saved!");
+      })
+      .catch((e) => {
+        console.error("PUT /api/profile failed:", e);
+        toast.error("Failed to save profile");
+      })
+      .finally(() => setSaving(false));
   };
 
   return (
@@ -144,11 +201,24 @@ function Profile() {
       </div>
 
       <h2>Goals</h2>
-      <select name="goals">
+      <select name="goals" value={user.goal} onChange={handleGoalChange}>
         {GOAL_OPTIONS.map((x) => {
           return <option value={x}>{x}</option>
         })}
       </select>
+
+      <div style={{ marginTop: "16px"}}>
+        <button style={{
+          backgroundColor: "#c11554", 
+          color: "#ffffff", 
+          border: "none", 
+          padding: "8px 14px",
+          borderRadius: "6px",
+          cursor: saving ? "not-allowed" : "pointer"
+  }} onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save Profile"}
+        </button>
+      </div>
     </main>
   );
 }

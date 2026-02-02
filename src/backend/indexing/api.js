@@ -1,6 +1,6 @@
 import express from "express";
 import indexes from "./indexes.json" with { type: "json" };
-import { getRecommendations } from "../recommendation/queryEngine";
+import { getRecommendations } from "../recommendation/queryEngine.js";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -35,7 +35,8 @@ api.post("/recommend", (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Recommendation failed" });
-
+  }
+});
 //get profile info
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

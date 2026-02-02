@@ -108,6 +108,12 @@ button:focus-visible {
 }
 
 /* Profile */
+select, option {
+  background-color: lightgray;
+  color: inherit;
+  border-radius: 0.25rem;
+  font-family: inherit;
+}
 
 .info-list {
   display: flex;

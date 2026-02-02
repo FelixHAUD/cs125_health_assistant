@@ -1,0 +1,21 @@
+{
+  "user": {
+    "name": "Ethan Yim",
+    "age": "21",
+    "heightFt": 5,
+    "heightIn": "10",
+    "weight": "160",
+    "goal": "I want to lose weight and become more lean."
+  },
+  "vitals": {
+    "heartrate": 72,
+    "bpSys": 120,
+    "bpDia": 80,
+    "bfPct": 15.6
+  },
+  "goalOptions": [
+    "I want to lose weight and become more lean.",
+    "I want to maintain my weight, but change fat to muscle.",
+    "I want to gain muscle (and weight along with that)."
+  ]
+}

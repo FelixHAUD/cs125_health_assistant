@@ -1,5 +1,6 @@
 import express from "express";
 import indexes from "./indexes.json" with { type: "json" };
+import { getRecommendations } from "../recommendation/queryEngine";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -20,7 +21,20 @@ function getRecipesForMeal(meal) {
 api.get("/breakfast", (req, res) => res.json(getRecipesForMeal("breakfast")));
 api.get("/lunch", (req, res) => res.json(getRecipesForMeal("lunch")));
 api.get("/dinner", (req, res) => res.json(getRecipesForMeal("dinner")));
+// recipes based on userContext
+api.post("/recommend", (req, res) => {
+  try {
+    const userContext = req.body;
 
+    const results = getRecommendations(userContext, 10);
+
+    res.json({
+      count: results.length,
+      results
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Recommendation failed" });
 
 //get profile info
 const __filename = fileURLToPath(import.meta.url);

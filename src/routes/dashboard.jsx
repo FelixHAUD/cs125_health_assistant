@@ -1,5 +1,24 @@
 import { useEffect, useState } from "react";
 
+// Given time of day, choose which meal to suggest
+const chooseNextMeal = () => {
+  const hour = new Date().getHours();
+  if (hour < 8) return "breakfast";
+  if (hour < 12) return "lunch";
+  if (hour < 20) return "dinner";
+  return "breakfast tomorrow";
+}
+
+// Helper to parse the Python-style list string from the JSON
+const parseIngredients = (val) => {
+  if (Array.isArray(val)) return val;
+  if (typeof val !== 'string') return [];
+  // Remove brackets and split by "', '"
+  const cleaned = val.replace(/^\[|\]$/g, '').trim();
+  if (!cleaned) return [];
+  return cleaned.split("', '").map(s => s.replace(/^'|'$/g, '').replace(/\\'/g, "'"));
+};
+
 function Dashboard() {
   const today = new Date().toLocaleDateString();
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -21,12 +40,31 @@ function Dashboard() {
     return <main><h1>Dashboard</h1><p>Loading...</p></main>;
   }
 
+  // PLACEHOLDER!!!
+  let chosenRecipe = breakfastRecipes[0];
+
   return (
     <main>
       <h1>Dashboard</h1>
-      <span className="db-name">Welcome, [name]!</span>
+      <span className="db-name">Welcome, !</span>
       <p>It is <b>{time}</b> on <b>{today}</b>.</p>
-      <p>Your recommended meal is {breakfastRecipes[0]?.title}, to be had for [breakfast tomorrow morning].</p>
+      <h2>Recommended meal</h2>
+      <p>Your recommended meal is <b>{breakfastRecipes[0]?.title}</b>, to be had for <i>{chooseNextMeal()}</i>.</p>
+    <h3>Recipe</h3>
+      <h4>Ingredients</h4>
+      {chosenRecipe?.ingredients && (
+        <ul>
+        {parseIngredients(chosenRecipe.ingredients).map((ingredient, index) => (
+          <li key={index}>{ingredient}</li>
+        ))}
+      </ul>
+      )}
+      <h4>Steps</h4>
+      <ol>
+        {chosenRecipe?.instructions.split(". ").map((step, index) => (
+          <li key={index}>{step.trim()}.<br/></li>
+        ))}
+      </ol>
     </main>
   )
 }

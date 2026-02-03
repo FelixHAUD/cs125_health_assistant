@@ -2,6 +2,7 @@ import './App.css'
 import Layout from './components/Layout.jsx'
 import Dashboard from './routes/dashboard.jsx'
 import Profile from './routes/profile.jsx'
+import Log from './routes/log.jsx'
 // import { BrowserRouter } from 'react-router'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from "react-hot-toast";
@@ -15,6 +16,7 @@ function App() {
      <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
+        <Route path="log" element={<Log />} />
         <Route path="profile" element={<Profile />} />
       </Route>
      </Routes>

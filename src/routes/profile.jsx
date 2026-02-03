@@ -13,7 +13,7 @@ const GOAL_OPTIONS = [
 function Profile() {
   // 1. Initialize state for Basic Info (Manual Inputs)
   const [user, setUser] = useState({
-    name: "Ethan Yim",
+    name: "John Doe",
     age: 21,
     heightFt: 5,
     heightIn: 10,
@@ -58,10 +58,10 @@ function Profile() {
   };
 
   // Helper function to handle changes for vitals
-  const handleVitalChange = (e) => {
-    const { name, value } = e.target;
-    setVitals((prev) => ({ ...prev, [name]: value }));
-  };
+  // const handleVitalChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setVitals((prev) => ({ ...prev, [name]: value }));
+  // };
 
   // Helper function handle changes for vitals
   const handleGoalChange = (e) => {
@@ -96,6 +96,11 @@ function Profile() {
       })
       .finally(() => setSaving(false));
   };
+
+  const heightTotalInches = (parseInt(user.heightFt || 0) * 12) + parseInt(user.heightIn || 0);
+  const bmiValue = heightTotalInches > 0 
+    ? ((703 * parseInt(user.weight || 0)) / (heightTotalInches * heightTotalInches)).toFixed(1)
+    : 0;
 
   return (
     <main>
@@ -164,12 +169,12 @@ function Profile() {
 
         <label className="info-line">
           <span>BMI</span>
-          <div>{7.03 * Math.round(100 * user.weight/((12 * user.heightFt + user.heightIn) * (12 * user.heightFt + user.heightIn)))}</div>
+          <div>{bmiValue}</div>
         </label>
       </div>
 
       <h2>Vitals</h2>
-      <span className="subtitle">Simulated data...</span>
+      <span className="subtitle">Data fetched from Apple Health 23 min ago... (just kidding, simulated data)</span>
       
       <div className="info-list">
         <label className="info-line">

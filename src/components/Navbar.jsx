@@ -13,6 +13,7 @@ export default function Navbar() {
       </Link>
     
       <Link to="/">Dashboard</Link>
+      <Link to="/log">Log</Link>
       <Link to="/profile">Profile</Link>
     </nav>
   );

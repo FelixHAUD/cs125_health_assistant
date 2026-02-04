@@ -1,11 +1,13 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { rankRecipes } from "./ranker.js";
 import { explainRecipe } from "./explanation.js";
 
-const indexesPath = path.resolve(
-  "src/backend/indexing/indexes.json"
-);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const indexesPath = path.join(__dirname, "../indexing/indexes.json");
 
 const indexes = JSON.parse(fs.readFileSync(indexesPath, "utf-8"));
 

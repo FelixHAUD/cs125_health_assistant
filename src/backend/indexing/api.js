@@ -41,6 +41,7 @@ api.post("/recommend", (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROFILE_PATH = path.join(__dirname, "profile.json");
+const EXERCISES_PATH = path.join(__dirname, "exercises.json");
 
 async function readProfile() {
   const raw = await fs.readFile(PROFILE_PATH, "utf-8");
@@ -63,7 +64,58 @@ async function writeProfile(profile) {
   );
 }
 
+async function readExercises() {
+  try {
+    const raw = await fs.readFile(EXERCISES_PATH, "utf-8");
+    return JSON.parse(raw);
+  } catch (err) {
+    if (err.code === "ENOENT") return [];
+    throw err;
+  }
+}
+
+async function writeExercises(exercises) {
+  await fs.writeFile(
+    EXERCISES_PATH,
+    JSON.stringify(exercises, null, 2),
+    "utf-8"
+  );
+}
+
 // --- routes ---
+api.get("/exercises", async (req, res) => {
+  try {
+    const data = await readExercises();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to read exercises" });
+  }
+});
+
+api.post("/exercises", async (req, res) => {
+  try {
+    const newLog = req.body;
+    const logs = await readExercises();
+    logs.unshift(newLog); // Add to beginning
+    await writeExercises(logs);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to save exercise" });
+  }
+});
+
+api.delete("/exercises/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    let logs = await readExercises();
+    logs = logs.filter(l => l.id !== id);
+    await writeExercises(logs);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete exercise" });
+  }
+});
+
 api.get("/profile", async (req, res) => {
   try {
     const profile = await readProfile();

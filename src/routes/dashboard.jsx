@@ -23,16 +23,29 @@ function Dashboard() {
   const today = new Date().toLocaleDateString();
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const [breakfastRecipes, setBreakfastRecipes] = useState([]);
+  const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/breakfast") 
+    const fetchRecipes = fetch("/api/breakfast") 
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
       .then(setBreakfastRecipes)
-      .catch((e) => console.error("Fetch /api/breakfast failed:", e))
+      .catch((e) => console.error("Fetch /api/breakfast failed:", e));
+
+    const fetchProfile = fetch("/api/profile")
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data?.user?.name) setUserName(data.user.name);
+      })
+      .catch((e) => console.error("Fetch /api/profile failed:", e));
+
+    Promise.all([fetchRecipes, fetchProfile])
       .finally(() => setLoading(false));
   }, []);
 
@@ -46,7 +59,7 @@ function Dashboard() {
   return (
     <main>
       <h1>Dashboard</h1>
-      <span className="db-name">Welcome, !</span>
+      <span className="db-name">Welcome, {userName}!</span>
       <p>It is <b>{time}</b> on <b>{today}</b>.</p>
       <h2>Recommended meal</h2>
       <p>Your recommended meal is <b>{breakfastRecipes[0]?.title}</b>, to be had for <i>{chooseNextMeal()}</i>.</p>

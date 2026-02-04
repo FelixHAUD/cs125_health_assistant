@@ -1,10 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Log() {
   const [exerciseType, setExerciseType] = useState('cardio');
   const [intensity, setIntensity] = useState('medium');
   const [duration, setDuration] = useState('');
   const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/exercises')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setLogs(data);
+      })
+      .catch(console.error);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,9 +31,22 @@ export default function Log() {
     };
     
     setLogs([newLog, ...logs]);
+    
+    fetch('/api/exercises', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newLog)
+    }).catch(err => console.error("Failed to save log:", err));
+
     setDuration('');
     setExerciseType('cardio');
     setIntensity('medium');
+  };
+
+  const handleRemove = (id) => {
+    setLogs(logs.filter(log => log.id !== id));
+    fetch(`/api/exercises/${id}`, { method: 'DELETE' })
+      .catch(err => console.error("Failed to delete log:", err));
   };
 
   return (
@@ -93,12 +115,31 @@ export default function Log() {
                 marginBottom: '10px', 
                 border: '1px solid #e0e0e0', 
                 borderRadius: '4px',
-                backgroundColor: '#f9f9f9'
+                backgroundColor: '#f9f9f9',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
               }}
             >
-              <strong>{log.type === 'cardio' ? 'Cardio' : 'Weight Training'}</strong> - 
-              <span style={{ marginLeft: '10px' }}>({log.intensity}, {log.duration} min)</span>
-              <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>{log.date}</div>
+              <div>
+                <strong>{log.type === 'cardio' ? 'Cardio' : 'Weight Training'}</strong> - 
+                <span style={{ marginLeft: '10px' }}>({log.intensity}, {log.duration} min)</span>
+                <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>{log.date}</div>
+              </div>
+              <button 
+                onClick={() => handleRemove(log.id)}
+                style={{
+                  backgroundColor: '#ff4d4d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '5px 10px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                Remove
+              </button>
             </li>
           ))}
         </ul>

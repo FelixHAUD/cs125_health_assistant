@@ -9,42 +9,20 @@ const indexesPath = path.resolve(
 
 const indexes = JSON.parse(fs.readFileSync(indexesPath, "utf-8"));
 
-function intersectSets(arrays) {
-  if (arrays.length === 0) return [];
+function violatesRestrictions(recipeId, restrictions, indexes) {
+  if (!restrictions || restrictions.length === 0) return false;
 
-  return arrays.reduce((acc, curr) =>
-    acc.filter(id => curr.includes(id))
+  return restrictions.some(r =>
+    !indexes.dietaryTags[r]?.includes(recipeId)
   );
 }
 
-
-
 export function getRecommendations(userContext, limit = 10) {
-  const filters = [];
+  let candidateIds = Object.keys(indexes.recipeById);
 
-  if (userContext.mealType) {
-    filters.push(indexes.mealType[userContext.mealType] || []);
-  }
-
-  if (userContext.budget) {
-    filters.push(indexes.costBucket[userContext.budget] || []);
-  }
-
-  if (userContext.caloriePref) {
-    filters.push(indexes.calorieBucket[userContext.caloriePref] || []);
-  }
-
-  if (userContext.goals?.includes("high_protein")) {
-    filters.push(indexes.proteinBucket["high"] || []);
-  }
-
-  if (userContext.restrictions?.length) {
-    userContext.restrictions.forEach(r => {
-      filters.push(indexes.dietaryTags[r] || []);
-    });
-  }
-
-  const candidateIds = intersectSets(filters);
+  candidateIds = candidateIds.filter(id =>
+    !violatesRestrictions(id, userContext.restrictions, indexes)
+  );
 
   const ranked = rankRecipes(candidateIds, userContext, indexes);
 

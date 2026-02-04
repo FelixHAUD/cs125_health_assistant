@@ -1,38 +1,37 @@
 /**
  * Heuristic signal - not ground truth
  */
+import { parseIngredients, toGrams } from "./ingredientParser.js";
+
 export function estimateNutrition(ingredientsText, nutritionLookup) {
-  if (!ingredientsText || !nutritionLookup) return null;
+  if (!ingredientsText) return null;
 
-  const text = ingredientsText.toLowerCase();
+  let totalCalories = 0;
+  let totalProtein = 0;
 
-  let calorieScore = 0;
-  let proteinScore = 0;
-  let matches = 0;
+  const ingredients = parseIngredients(ingredientsText);
 
-  const matchedFoods = new Set();
+  ingredients.forEach(({ name, quantity, unit }) => {
+    const data = nutritionLookup[name];
+    if (!data) return;
 
-  for (const [foodName, values] of Object.entries(nutritionLookup)) {
-    if (!text.includes(foodName)) continue;
-    if (matchedFoods.has(foodName)) continue;
+    const grams = toGrams(quantity, unit);
+    const scale = grams / 100;
 
-    matchedFoods.add(foodName);
-    matches++;
-
-    if (typeof values.calories === "number") {
-      calorieScore += values.calories;
+    if (typeof data.calories === "number") {
+      totalCalories += data.calories * scale;
     }
-    if (typeof values.protein === "number") {
-      proteinScore += values.protein;
-    }
-  }
 
-  if (matches === 0) return null;
+    if (typeof data.protein === "number") {
+      totalProtein += data.protein * scale;
+    }
+  });
+
+  if (totalCalories === 0 && totalProtein === 0) return null;
 
   return {
-    calories: calorieScore,
-    protein: proteinScore,
-    confidence: Math.min(1, 0.3 + matches * 0.15),
+    calories: Math.round(totalCalories),
+    protein: Math.round(totalProtein),
   };
 }
 
@@ -89,19 +88,22 @@ export function costBucket(cost) {
 
 export function estimateRecipeCost(ingredientsText, priceLookup) {
   let totalCost = 0;
-  const text = ingredientsText.toLowerCase();
-  const matched = new Set();
 
-  for (const [food, price] of Object.entries(priceLookup)) {
-    if (text.includes(food) && !matched.has(food)) {
-      matched.add(food);
-      totalCost += price;
-    }
-  }
+  const ingredients = parseIngredients(ingredientsText);
 
-  return totalCost > 0 ? Number(totalCost.toFixed(2)) : null;
+  ingredients.forEach(({ name, quantity, unit }) => {
+    const pricePer100g = priceLookup[name];
+    if (!pricePer100g) return;
+
+    const grams = toGrams(quantity, unit);
+    const scale = grams / 100;
+
+    totalCost += pricePer100g * scale;
+  });
+
+  if (totalCost === 0) return null;
+  return Number(totalCost.toFixed(2));
 }
-
 export function tokenizeIngredients(text) {
   return text
     .toLowerCase()

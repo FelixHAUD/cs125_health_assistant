@@ -101,3 +101,11 @@ export function estimateRecipeCost(ingredientsText, priceLookup) {
 
   return totalCost > 0 ? Number(totalCost.toFixed(2)) : null;
 }
+
+export function tokenizeIngredients(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, "")
+    .split(/\s+/)
+    .filter(w => w.length > 2);
+}

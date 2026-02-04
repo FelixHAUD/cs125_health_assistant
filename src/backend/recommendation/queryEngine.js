@@ -18,16 +18,54 @@ function violatesRestrictions(recipeId, restrictions, indexes) {
 }
 
 export function getRecommendations(userContext, limit = 10) {
-  let candidateIds = Object.keys(indexes.recipeById);
+  let candidateSets = [];
 
-  candidateIds = candidateIds.filter(id =>
-    !violatesRestrictions(id, userContext.restrictions, indexes)
-  );
+  if (userContext.ingredients?.length) {
+    userContext.ingredients.forEach(term => {
+      const ids = indexes.ingredientIndex?.[term.toLowerCase()];
+      if (ids) candidateSets.push(ids);
+    });
+  }
+
+  if (userContext.mealType) {
+    candidateSets.push(indexes.mealType[userContext.mealType] || []);
+  }
+
+  if (userContext.budget) {
+    candidateSets.push(indexes.costBucket[userContext.budget] || []);
+  }
+
+  if (userContext.caloriePref) {
+    candidateSets.push(indexes.calorieBucket[userContext.caloriePref] || []);
+  }
+
+  if (userContext.goals?.includes("high_protein")) {
+    candidateSets.push(indexes.proteinBucket["high"] || []);
+  }
+
+  if (userContext.restrictions?.length) {
+    userContext.restrictions.forEach(r => {
+      candidateSets.push(indexes.dietaryTags[r] || []);
+    });
+  }
+
+  let candidateIds = candidateSets.length
+    ? intersectSets(candidateSets)
+    : Object.keys(indexes.recipeById);
 
   const ranked = rankRecipes(candidateIds, userContext, indexes);
-
+  console.log("Candidate count:", candidateIds.length);
   return ranked.slice(0, limit).map(item => ({
     ...item,
     explanation: explainRecipe(item.recipeId, userContext, indexes)
   }));
+}
+
+
+
+function intersectSets(arrays) {
+  if (arrays.length === 0) return [];
+  return arrays.reduce((acc, curr) =>
+    acc.filter(id => curr.includes(id))
+  );
 }

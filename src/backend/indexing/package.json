@@ -4,9 +4,14 @@
     "private": true,
     "type": "module",
     "scripts": {
-      "dev": "node api.js"
+        "dev": "node api.js",
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
     },
     "dependencies": {
-      "express": "^4.19.2"
+        "express": "^4.19.2"
+    },
+    "devDependencies": {
+        "jest": "^30.2.0"
     }
-  }
+
+}

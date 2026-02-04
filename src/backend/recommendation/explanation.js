@@ -2,21 +2,28 @@ export function explainRecipe(recipeId, userContext, indexes) {
   const recipe = indexes.recipeById[recipeId];
   const reasons = [];
 
-  if (userContext.goals?.includes("high_protein")) {
-    reasons.push("high protein");
-  }
-  
-  if (userContext.restrictions?.includes("vegetarian")) {
-    reasons.push("vegetarian");
+  if (
+    userContext.mealType &&
+    indexes.mealType[userContext.mealType]?.includes(recipeId)
+  ) {
+    reasons.push(`matches your ${userContext.mealType} preference`);
   }
 
-  if (userContext.budget === "cheap") {
+  if (userContext.goals?.includes("high_protein") && recipe.protein >= 20) {
+    reasons.push(`high in protein (${recipe.protein}g)`);
+  }
+
+  if (userContext.budget === "cheap" && recipe.estimatedCost < 2) {
     reasons.push("budget-friendly");
   }
 
-  if (userContext.caloriePref === "low") {
+  if (userContext.caloriePref === "low" && recipe.calories < 400) {
     reasons.push("low calorie");
   }
 
-  return `Recommended because it is ${reasons.join(", ")} and matches your preferences.`;
+  if (!reasons.length) {
+    reasons.push("a balanced match for your preferences");
+  }
+
+  return reasons.join(", ");
 }

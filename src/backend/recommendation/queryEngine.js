@@ -9,47 +9,63 @@ const indexesPath = path.resolve(
 
 const indexes = JSON.parse(fs.readFileSync(indexesPath, "utf-8"));
 
-function intersectSets(arrays) {
-  if (arrays.length === 0) return [];
+function violatesRestrictions(recipeId, restrictions, indexes) {
+  if (!restrictions || restrictions.length === 0) return false;
 
-  return arrays.reduce((acc, curr) =>
-    acc.filter(id => curr.includes(id))
+  return restrictions.some(r =>
+    !indexes.dietaryTags[r]?.includes(recipeId)
   );
 }
 
-
-
 export function getRecommendations(userContext, limit = 10) {
-  const filters = [];
+  let candidateSets = [];
+
+  if (userContext.ingredients?.length) {
+    userContext.ingredients.forEach(term => {
+      const ids = indexes.ingredientIndex?.[term.toLowerCase()];
+      if (ids) candidateSets.push(ids);
+    });
+  }
 
   if (userContext.mealType) {
-    filters.push(indexes.mealType[userContext.mealType] || []);
+    candidateSets.push(indexes.mealType[userContext.mealType] || []);
   }
 
   if (userContext.budget) {
-    filters.push(indexes.costBucket[userContext.budget] || []);
+    candidateSets.push(indexes.costBucket[userContext.budget] || []);
   }
 
   if (userContext.caloriePref) {
-    filters.push(indexes.calorieBucket[userContext.caloriePref] || []);
+    candidateSets.push(indexes.calorieBucket[userContext.caloriePref] || []);
   }
 
   if (userContext.goals?.includes("high_protein")) {
-    filters.push(indexes.proteinBucket["high"] || []);
+    candidateSets.push(indexes.proteinBucket["high"] || []);
   }
 
   if (userContext.restrictions?.length) {
     userContext.restrictions.forEach(r => {
-      filters.push(indexes.dietaryTags[r] || []);
+      candidateSets.push(indexes.dietaryTags[r] || []);
     });
   }
 
-  const candidateIds = intersectSets(filters);
+  let candidateIds = candidateSets.length
+    ? intersectSets(candidateSets)
+    : Object.keys(indexes.recipeById);
 
   const ranked = rankRecipes(candidateIds, userContext, indexes);
-
+  console.log("Candidate count:", candidateIds.length);
   return ranked.slice(0, limit).map(item => ({
     ...item,
     explanation: explainRecipe(item.recipeId, userContext, indexes)
   }));
+}
+
+
+
+function intersectSets(arrays) {
+  if (arrays.length === 0) return [];
+  return arrays.reduce((acc, curr) =>
+    acc.filter(id => curr.includes(id))
+  );
 }

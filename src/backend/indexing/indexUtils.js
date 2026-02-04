@@ -1,79 +1,61 @@
 /**
- * Estimates calories and protein from ingredient text
- * using a nutrition lookup table.
- *
- * @param {string} ingredientsText
- * @param {Object} nutritionLookup
- * @returns {{ calories: number, protein: number } | null}
+ * Heuristic signal - not ground truth
  */
+import { parseIngredients, toGrams } from "./ingredientParser.js";
+
 export function estimateNutrition(ingredientsText, nutritionLookup) {
-  if (!ingredientsText || !nutritionLookup) return null;
+  if (!ingredientsText) return null;
 
   let totalCalories = 0;
   let totalProtein = 0;
 
-  const text = ingredientsText.toLowerCase();
+  const ingredients = parseIngredients(ingredientsText);
 
-  for (const [foodName, values] of Object.entries(nutritionLookup)) {
-    if (!text.includes(foodName)) continue;
+  ingredients.forEach(({ name, quantity, unit }) => {
+    const data = nutritionLookup[name];
+    if (!data) return;
 
-    if (typeof values.calories === "number") {
-      totalCalories += values.calories;
+    const grams = toGrams(quantity, unit);
+    const scale = grams / 100;
+
+    if (typeof data.calories === "number") {
+      totalCalories += data.calories * scale;
     }
 
-    if (typeof values.protein === "number") {
-      totalProtein += values.protein;
+    if (typeof data.protein === "number") {
+      totalProtein += data.protein * scale;
     }
-  }
+  });
 
   if (totalCalories === 0 && totalProtein === 0) return null;
 
   return {
     calories: Math.round(totalCalories),
-    protein: Math.round(totalProtein)
+    protein: Math.round(totalProtein),
   };
 }
 
-/**
- * Returns the calorie bucket
- *
- * @param {number} calories
- * @returns {{ calorieBucket: string } | null}
- */
+
 export function calorieBucket(cals) {
-  if (cals < 400) return "low";
+  if (cals < 300) return "low";
   if (cals < 700) return "medium";
   return "high";
 }
-/**
- * Returns the protein bucket
- *
- * @param {number} protein
- * @returns {{ proteinBucket: string } | null}
- */
+
 export function proteinBucket(protein) {
-  if (protein < 10) return "low";
+  if (protein < 15) return "low";
   if (protein < 30) return "medium";
   return "high";
 }
-/**
- * Infers the meal type using parsing
- *
- * @param {string} title
- * @returns {{ mealType: string } | null}
- */
+
+
 export function inferMealType(title) {
   const t = title.toLowerCase();
   if (t.includes("breakfast")) return "breakfast";
   if (t.includes("salad") || t.includes("sandwich")) return "lunch";
-  return "dinner"; // default
+  return "dinner";
 }
-/**
- * Returns the dietary tags
- *
- * @param {string} ingredientsText
- * @returns {{ dietaryTags: Array<string> } | null}
- */
+
 export function inferDietaryTags(ingredientsText) {
   const text = ingredientsText.toLowerCase();
   const tags = [];
@@ -86,52 +68,46 @@ export function inferDietaryTags(ingredientsText) {
 
   if (!hasMeat) tags.push("vegetarian");
   if (hasMeat) tags.push("high_protein");
-  if (!text.includes("flour") && !text.includes("bread")) tags.push("gluten_free");
+  if (!text.includes("flour") && !text.includes("bread"))
+    tags.push("gluten_free");
 
   return tags;
 }
-/**
- * Returns the cost buckets
- * General heuristic based on the ingredients
- * TODO: count the ingredients vs. cost. 
- *
- * @param {number} ingredientCount
- * @returns {{ costBucket: string } | null}
- */
-export function costBucket(ingredientCount) {
-  if (ingredientCount <= 6) return "cheap";
-  if (ingredientCount <= 12) return "moderate";
-  return "expensive";
-}
-/**
- * Returns the prepTimeBucket
- *
- * @param {number} instructionLength
- * @returns {{ prepTimeBucket: string } | null}
- */
-export function prepTimeBucket(instructionLength) {
-  if (instructionLength < 500) return "quick";
-  if (instructionLength < 1200) return "medium";
+
+export function prepTimeBucket(len) {
+  if (len < 500) return "quick";
+  if (len < 1200) return "medium";
   return "long";
 }
-/**
- * Estimates total recipe cost based on ingredient matches.
- *
- * @param {string} ingredientsText 
- * @param {{ [foodName: string]: number }} priceLookup 
- * @returns {number | null} 
- */
+
+export function costBucket(cost) {
+  if (cost < 2) return "cheap";
+  if (cost < 5) return "moderate";
+  return "expensive";
+}
+
 export function estimateRecipeCost(ingredientsText, priceLookup) {
   let totalCost = 0;
-  const text = ingredientsText.toLowerCase();
 
-  Object.entries(priceLookup).forEach(([food, price]) => {
-    if (text.includes(food)) {
-      totalCost += price;
-    }
+  const ingredients = parseIngredients(ingredientsText);
+
+  ingredients.forEach(({ name, quantity, unit }) => {
+    const pricePer100g = priceLookup[name];
+    if (!pricePer100g) return;
+
+    const grams = toGrams(quantity, unit);
+    const scale = grams / 100;
+
+    totalCost += pricePer100g * scale;
   });
 
   if (totalCost === 0) return null;
-
   return Number(totalCost.toFixed(2));
+}
+export function tokenizeIngredients(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, "")
+    .split(/\s+/)
+    .filter(w => w.length > 2);
 }

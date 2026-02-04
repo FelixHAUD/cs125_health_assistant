@@ -14,7 +14,6 @@ import {
 // ---- Load recipes ----
 const dataDir = path.resolve("src/backend/json");
 
-
 const recipesPath = path.join(dataDir, "recipes.json");
 const nutritionPath = path.join(dataDir, "nutrition.json");
 const pricePath = path.join(dataDir, "prices.json");
@@ -104,21 +103,24 @@ recipes.forEach((recipe) => {
   const prep = prepTimeBucket(recipe.Instructions.length);
   indexes.prepTimeBucket[prep] ??= [];
   indexes.prepTimeBucket[prep].push(id);
-
   const estimatedNutrition = estimateNutrition(
     recipe.Ingredients,
     nutritionByFoodName,
   );
 
   if (estimatedNutrition) {
-    indexes.recipeById[id].calories = estimatedNutrition.calories;
-    indexes.recipeById[id].protein = estimatedNutrition.protein;
-
     const calBucket = calorieBucket(estimatedNutrition.calories);
+    const protBucket = proteinBucket(estimatedNutrition.protein);
+
+    indexes.recipeById[id].nutrition = {
+      calorieBucket: calBucket,
+      proteinBucket: protBucket,
+      confidence: estimatedNutrition.confidence,
+    };
+
     indexes.calorieBucket[calBucket] ??= [];
     indexes.calorieBucket[calBucket].push(id);
 
-    const protBucket = proteinBucket(estimatedNutrition.protein);
     indexes.proteinBucket[protBucket] ??= [];
     indexes.proteinBucket[protBucket].push(id);
   }

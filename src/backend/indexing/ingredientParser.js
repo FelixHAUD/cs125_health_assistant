@@ -56,3 +56,4 @@ export function toGrams(quantity, unit) {
   if (!unit || !UNIT_TO_GRAMS[unit]) return quantity * 100; 
   return quantity * UNIT_TO_GRAMS[unit];
 }
+

@@ -5,7 +5,7 @@ export default function Search() {
   const [budget, setBudget] = useState("cheap");
   const [caloriePref, setCaloriePref] = useState("low");
   const [highProtein, setHighProtein] = useState(false);
-
+  const [ingredients, setIngredients] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
@@ -20,6 +20,7 @@ export default function Search() {
       budget,
       caloriePref,
       goals: highProtein ? ["high_protein"] : [],
+      ingredients:ingredients.trim() != "" ? ingredients.split(",").map((i) => i.trim()).filter(Boolean) : [],
     };
 
     try {
@@ -84,6 +85,17 @@ export default function Search() {
               onChange={(e) => setHighProtein(e.target.checked)}
             />
             High protein
+          </label>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <label>
+            Ingredients (comma-separated):
+            <input
+              value={ingredients}
+              onChange={(e) => setIngredients(e.target.value)}
+              style={{ marginLeft: 8, width: "60%" }}
+              placeholder=""
+            />
           </label>
         </div>
 

@@ -23,7 +23,7 @@ export function rankRecipes(recipeIds, userContext, indexes) {
         });
       }
 
-      return { recipeId: id, score };
+      return { recipeId: id, recipeTitle: recipe.title, score };
     })
     .sort((a, b) => b.score - a.score);
 }

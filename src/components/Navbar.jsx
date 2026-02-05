@@ -15,6 +15,7 @@ export default function Navbar() {
       <Link to="/">Dashboard</Link>
       <Link to="/log">Log</Link>
       <Link to="/profile">Profile</Link>
+      <Link to="/search">Search</Link>
     </nav>
   );
 }

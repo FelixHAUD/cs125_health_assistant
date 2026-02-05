@@ -145,7 +145,7 @@ export default function Log() {
             </label>
           </div>
 
-          <button type="submit" style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}>
+          <button type="submit" style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer', backgroundColor: "#c11554", color: "#ffffff" }}>
             Log Exercise
           </button>
         </form>
@@ -231,7 +231,7 @@ export default function Log() {
             </label>
           </div>
 
-          <button type="submit" style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}>
+          <button type="submit" style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer', backgroundColor: "#c11554", color: "#ffffff" }}>
             Log Meal
           </button>
         </form>

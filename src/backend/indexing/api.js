@@ -27,7 +27,6 @@ api.post("/recommend", (req, res) => {
     const userContext = req.body;
 
     const results = getRecommendations(userContext, 10);
-
     res.json({
       count: results.length,
       results
@@ -147,7 +146,6 @@ api.get("/meals", async (req, res) => {
 api.post("/meals", async (req, res) => {
   try {
     const newMeal = req.body;
-    console.log("Incoming meal:", newMeal);
 
     if (!newMeal?.id || !newMeal?.meal || !newMeal?.type || !newMeal?.date) {
       return res.status(400).json({ error: "Invalid meal format" });

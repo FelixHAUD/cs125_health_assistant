@@ -42,6 +42,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROFILE_PATH = path.join(__dirname, "profile.json");
 const EXERCISES_PATH = path.join(__dirname, "exercises.json");
+const MEALS_PATH = path.join(__dirname, "meals.json");
 
 async function readProfile() {
   const raw = await fs.readFile(PROFILE_PATH, "utf-8");
@@ -60,6 +61,24 @@ async function writeProfile(profile) {
   await fs.writeFile(
     PROFILE_PATH,
     JSON.stringify(profile, null, 2),
+    "utf-8"
+  );
+}
+
+async function readMeals() {
+  try {
+    const raw = await fs.readFile(MEALS_PATH, "utf-8");
+    return JSON.parse(raw);
+  } catch (err) {
+    if (err.code === "ENOENT") return [];
+    throw err;
+  }
+}
+
+async function writeMeals(meals) {
+  await fs.writeFile(
+    MEALS_PATH,
+    JSON.stringify(meals, null, 2),
     "utf-8"
   );
 }
@@ -113,6 +132,47 @@ api.delete("/exercises/:id", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete exercise" });
+  }
+});
+
+api.get("/meals", async (req, res) => {
+  try {
+    const meals = await readMeals();
+    res.json(meals);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to read meals" });
+  }
+});
+
+api.post("/meals", async (req, res) => {
+  try {
+    const newMeal = req.body;
+    console.log("Incoming meal:", newMeal);
+
+    if (!newMeal?.id || !newMeal?.meal || !newMeal?.type || !newMeal?.date) {
+      return res.status(400).json({ error: "Invalid meal format" });
+    }
+
+    const meals = await readMeals();
+    meals.unshift(newMeal); // Add to beginning
+    await writeMeals(meals);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to save meal" });
+  }
+});
+
+api.delete("/meals/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    let meals = await readMeals();
+
+    meals = meals.filter(m => m.id !== id);
+    await writeMeals(meals);
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete meal" });
   }
 });
 

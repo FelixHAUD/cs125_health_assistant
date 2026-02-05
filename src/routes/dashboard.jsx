@@ -20,20 +20,29 @@ const parseIngredients = (val) => {
 };
 
 function Dashboard() {
+
+  // get date and time to display on dashboard
   const today = new Date().toLocaleDateString();
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const [breakfastRecipes, setBreakfastRecipes] = useState([]);
+
+  // figure out which meal to suggest
+  const mealLabel = chooseNextMeal();
+  const apiEndpoint = mealLabel === "breakfast tomorrow" ? "breakfast" : mealLabel;
+
+  // state for recipes and user name
+  const [recipes, setRecipes] = useState([]);
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // hook to fetch recipes and user profile on mount
   useEffect(() => {
-    const fetchRecipes = fetch("/api/breakfast") 
+    const fetchRecipes = fetch(`/api/${apiEndpoint}`) 
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
-      .then(setBreakfastRecipes)
-      .catch((e) => console.error("Fetch /api/breakfast failed:", e));
+      .then(setRecipes)
+      .catch((e) => console.error(`Fetch /api/${apiEndpoint} failed:`, e));
 
     const fetchProfile = fetch("/api/profile")
       .then((res) => {
@@ -54,7 +63,7 @@ function Dashboard() {
   }
 
   // PLACEHOLDER!!!
-  let chosenRecipe = breakfastRecipes[0];
+  let chosenRecipe = recipes[0];
 
   return (
     <main>
@@ -62,7 +71,7 @@ function Dashboard() {
       <span className="db-name">Welcome, {userName}!</span>
       <p>It is <b>{time}</b> on <b>{today}</b>.</p>
       <h2>Recommended meal</h2>
-      <p>Your recommended meal is <b>{breakfastRecipes[0]?.title}</b>, to be had for <i>{chooseNextMeal()}</i>.</p>
+      <p>Your recommended meal is <b>{chosenRecipe?.title}</b>, to be had for <i>{mealLabel}</i>.</p>
     <h3>Recipe</h3>
       <h4>Ingredients</h4>
       {chosenRecipe?.ingredients && (

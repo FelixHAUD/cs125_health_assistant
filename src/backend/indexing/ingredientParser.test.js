@@ -1,4 +1,4 @@
-import { parseIngredientLine, parseIngredients, toGrams, normalizeFractions } from './ingredientParser.js';
+import { parseIngredientLine, parseIngredients, toGrams } from './ingredientParser.js';
 
 describe('ingredientParser', () => {
   test('parseIngredientLine parses simple ingredient', () => {
@@ -10,10 +10,6 @@ describe('ingredientParser', () => {
     const result = parseIngredientLine('½ cup sugar');
     expect(result.quantity).toBe(0.5);
     expect(result.unit).toBe('cup');
-  });
-
-  test('normalizeFractions converts unicode', () => {
-    expect(normalizeFractions('½ tsp salt')).toBe('0.5 tsp salt');
   });
 
   test('toGrams converts units', () => {

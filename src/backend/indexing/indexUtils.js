@@ -10,7 +10,6 @@ export function estimateNutrition(ingredientsText, nutritionLookup) {
   let totalProtein = 0;
 
   const ingredients = parseIngredients(ingredientsText);
-
   ingredients.forEach(({ name, quantity, unit }) => {
     const data = nutritionLookup[name];
     if (!data) return;

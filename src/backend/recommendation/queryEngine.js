@@ -51,12 +51,34 @@ export function getRecommendations(userContext, limit = 10) {
     });
   }
 
-  let candidateIds = candidateSets.length
-    ? intersectSets(candidateSets)
-    : Object.keys(indexes.recipeById);
+  let candidateIds = [];
+
+  if (candidateSets.length) {
+    candidateIds = intersectSets(candidateSets);
+  }
+
+  // Loosen until 10 options
+  if (candidateIds.length < limit) {
+    const nonIngredientSets = candidateSets.slice(
+      userContext.ingredients?.length || 0
+    );
+    candidateIds = intersectSets(nonIngredientSets);
+  }
+
+  if (candidateIds.length < limit) {
+    if (userContext.mealType) {
+      candidateIds = indexes.mealType[userContext.mealType] || [];
+    }
+  }
+
+  if (candidateIds.length < limit) {
+    candidateIds = Object.keys(indexes.recipeById);
+  }
+
+  console.log("Candidate count:", candidateIds.length);
 
   const ranked = rankRecipes(candidateIds, userContext, indexes);
-  console.log("Candidate count:", candidateIds.length);
+
   return ranked.slice(0, limit).map(item => ({
     ...item,
     explanation: explainRecipe(item.recipeId, userContext, indexes)

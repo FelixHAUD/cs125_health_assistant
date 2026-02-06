@@ -5,7 +5,7 @@ function runTest(name, userContext) {
   console.log(`TEST: ${name}`);
   console.log("==============================");
 
-  const results = getRecommendations(userContext, 5);
+  const results = getRecommendations(userContext, 15);
 
   if (!results.length) {
     console.log("No results found.");

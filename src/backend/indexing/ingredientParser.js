@@ -19,14 +19,6 @@ function normalizeUnit(unit) {
   return unit.toLowerCase();
 }
 
-function parseQuantity(value) {
-  if (!value) return 1;
-  if (value.includes("/")) {
-    const [a, b] = value.split("/");
-    return Number(a) / Number(b);
-  }
-  return Number(value);
-}
 
 export function parseIngredientLine(line) {
   const clean = normalizeFractions(line)

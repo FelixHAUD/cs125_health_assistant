@@ -54,27 +54,27 @@ export default function Search() {
           <label>
             Meal type:
             <select value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ marginLeft: 8 }}>
-              <option value="breakfast">breakfast</option>
-              <option value="lunch">lunch</option>
-              <option value="dinner">dinner</option>
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="dinner">Dinner</option>
             </select>
           </label>
 
           <label>
             Budget:
             <select value={budget} onChange={(e) => setBudget(e.target.value)} style={{ marginLeft: 8 }}>
-              <option value="low">low</option>
-              <option value="medium">medium</option>
-              <option value="high">high</option>
+              <option value="cheap">Cheap</option>
+              <option value="moderate">Moderate</option>
+              <option value="expensive">Expensive</option>
             </select>
           </label>
 
           <label>
             Calories:
             <select value={caloriePref} onChange={(e) => setCaloriePref(e.target.value)} style={{ marginLeft: 8 }}>
-              <option value="low">low</option>
-              <option value="medium">medium</option>
-              <option value="high">high</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
             </select>
           </label>
 

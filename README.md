@@ -12,3 +12,11 @@ Personalized food and dieting recommendations based off of personal context disp
 ## Running the basic backend
 
 In a separate terminal change your directory to the src/backend/indexing directory and run 'npm run dev' from there to open the api endpoint. run 'npm install' as well when you first do this as well. Then you should start the frontend. Any changes to the backend you will have to restart it to take effect. 
+
+## Running unittests
+
+Using the jest framework, files with the test.js ending can be ran using npm test in their respective directories. 
+
+## Creating the index
+
+To create the index, run **node src/backend/indexing/buildIndexs.js** from the root directory. 

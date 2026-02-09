@@ -18,7 +18,10 @@ function Profile() {
     heightFt: 5,
     heightIn: 10,
     weight: 160,
-    goal: ""
+    goal: "",
+    budget: "cheap",
+    caloriePref: "medium",
+    highProtein: false
   });
 
   // 2. Initialize state for Vitals (Simulated/Editable for Prototype)
@@ -43,7 +46,10 @@ function Profile() {
         if (data?.user) {
           setUser({
             ...data.user,
-            goal: data.user.goal || (data.goalOptions?.[0] ?? GOAL_OPTIONS[0])
+            goal: data.user.goal || (data.goalOptions?.[0] ?? GOAL_OPTIONS[0]),
+            budget: data.user.budget || "cheap",
+            caloriePref: data.user.caloriePref || "medium",
+            highProtein: data.user.highProtein || false
           });
         }
         if (data?.vitals) setVitals(data.vitals);
@@ -53,8 +59,11 @@ function Profile() {
 
   // Helper function to handle changes for basic info
   const handleUserChange = (e) => {
-    const { name, value } = e.target;
-    setUser((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setUser((prev) => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   // Helper function to handle changes for vitals
@@ -206,11 +215,43 @@ function Profile() {
       </div>
 
       <h2>Goals</h2>
-      <select name="goals" value={user.goal} onChange={handleGoalChange}>
+      <select name="goals" value={user.goal} onChange={handleGoalChange} className="input-field" style={{ width: "100%" }}>
         {GOAL_OPTIONS.map((x) => {
-          return <option value={x}>{x}</option>
+          return <option key={x} value={x}>{x}</option>
         })}
       </select>
+
+      <h2>Meal Preferences</h2>
+      <div className="info-list">
+        <label className="info-line">
+          <span>Budget</span>
+          <select name="budget" value={user.budget} onChange={handleUserChange} className="input-field">
+            <option value="cheap">Cheap</option>
+            <option value="moderate">Moderate</option>
+            <option value="expensive">Expensive</option>
+          </select>
+        </label>
+
+        <label className="info-line">
+          <span>Calorie Level</span>
+          <select name="caloriePref" value={user.caloriePref} onChange={handleUserChange} className="input-field">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+
+        <label className="info-line" style={{ justifyContent: "flex-start", gap: "10px" }}>
+          <span>High Protein Required</span>
+          <input
+            type="checkbox"
+            name="highProtein"
+            checked={user.highProtein}
+            onChange={handleUserChange}
+            style={{ width: "20px", height: "20px" }}
+          />
+        </label>
+      </div>
 
       <div style={{ marginTop: "16px"}}>
         <button style={{

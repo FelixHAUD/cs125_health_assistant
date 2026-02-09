@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Search() {
   const [mealType, setMealType] = useState("breakfast");
@@ -9,6 +9,20 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
+
+  // Load defaults from profile
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user) {
+          if (data.user.budget) setBudget(data.user.budget);
+          if (data.user.caloriePref) setCaloriePref(data.user.caloriePref);
+          if (typeof data.user.highProtein === "boolean") setHighProtein(data.user.highProtein);
+        }
+      })
+      .catch((e) => console.error("Failed to load profile for search defaults:", e));
+  }, []);
 
   async function handleGetRecs(e) {
     e.preventDefault();

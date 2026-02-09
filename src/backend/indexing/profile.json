@@ -1,11 +1,14 @@
 {
   "user": {
-    "name": "John Smith",
+    "name": "Jedediah Smith",
     "age": "21",
     "heightFt": 5,
     "heightIn": "10",
-    "weight": "160",
-    "goal": "I want to lose weight and become more lean."
+    "weight": "115",
+    "goal": "I want to gain muscle (and weight along with that).",
+    "budget": "moderate",
+    "caloriePref": "high",
+    "highProtein": false
   },
   "vitals": {
     "heartrate": 72,

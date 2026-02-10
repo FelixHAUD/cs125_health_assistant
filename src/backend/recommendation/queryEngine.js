@@ -44,7 +44,12 @@ export function getRecommendations(userContext, limit = 10) {
   if (userContext.goals?.includes("high_protein")) {
     candidateSets.push(indexes.proteinBucket["high"] || []);
   }
-
+  if (userContext.goals?.includes("low_protein")) {
+    candidateSets.push(indexes.proteinBucket["low"] || []);
+  }
+  if (userContext.goals?.includes("medium_protein")) {
+      candidateSets.push(indexes.proteinBucket["medium"] || []);
+    }
   if (userContext.restrictions?.length) {
     userContext.restrictions.forEach(r => {
       candidateSets.push(indexes.dietaryTags[r] || []);

@@ -5,7 +5,13 @@
     "heightFt": 5,
     "heightIn": "10",
     "weight": "160",
-    "goal": "I want to lose weight and become more lean."
+    "goal": "I want to lose weight and become more lean.",
+    "budget": "moderate",
+    "caloriePref": "medium",
+    "healthLevel": "indulgent",
+    "dietaryRestrictions": [
+      "vegan"
+    ]
   },
   "vitals": {
     "heartrate": 72,

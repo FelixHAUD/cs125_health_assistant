@@ -10,16 +10,14 @@ const __dirname = path.dirname(__filename);
 const indexesPath = path.join(__dirname, "../indexing/indexes.json");
 let indexes = JSON.parse(fs.readFileSync(indexesPath, "utf-8"));
 
-
 function violatesRestrictions(recipeId, restrictions, indexes) {
   if (!Array.isArray(restrictions) || restrictions.length === 0) return false;
 
-  return restrictions.some(r => {
+  return restrictions.some((r) => {
     const allowed = indexes.dietaryTags?.[r];
     return Array.isArray(allowed) && !allowed.includes(recipeId);
   });
 }
-
 
 function intersectSets(sets) {
   if (!sets.length) return new Set();
@@ -27,12 +25,11 @@ function intersectSets(sets) {
   let result = new Set(sets[0]);
   for (let i = 1; i < sets.length; i++) {
     const next = new Set(sets[i]);
-    result = new Set([...result].filter(id => next.has(id)));
+    result = new Set([...result].filter((id) => next.has(id)));
     if (result.size === 0) break;
   }
   return result;
 }
-
 
 function unionSets(sets) {
   const result = new Set();
@@ -57,15 +54,39 @@ export function getRecommendations(userContext, limit = 10) {
   }
 
   if (userContext.mealType) {
-    preferenceSets.push(new Set(indexes.mealType?.[userContext.mealType] || []));
+    preferenceSets.push(
+      new Set(indexes.mealType?.[userContext.mealType] || []),
+    );
   }
 
   if (userContext.budget) {
-    preferenceSets.push(new Set(indexes.costBucket?.[userContext.budget] || []));
+    preferenceSets.push(
+      new Set(indexes.costBucket?.[userContext.budget] || []),
+    );
   }
 
   if (userContext.caloriePref) {
-    preferenceSets.push(new Set(indexes.calorieBucket?.[userContext.caloriePref] || []));
+    preferenceSets.push(
+      new Set(indexes.calorieBucket?.[userContext.caloriePref] || []),
+    );
+  }
+
+  if (userContext.healthLevel) {
+    preferenceSets.push(
+      new Set(indexes.healthLevel?.[userContext.healthLevel] || []),
+    );
+  }
+
+  if (userContext.cuisineType) {
+    preferenceSets.push(
+      new Set(indexes.cuisineType?.[userContext.cuisineType] || []),
+    );
+  }
+
+  if (userContext.dishType) {
+    preferenceSets.push(
+      new Set(indexes.dishType?.[userContext.dishType] || []),
+    );
   }
 
   if (Array.isArray(userContext.goals)) {
@@ -89,41 +110,35 @@ export function getRecommendations(userContext, limit = 10) {
   candidates = intersectSets([
     ...ingredientSets,
     ...preferenceSets,
-    ...restrictionSets
+    ...restrictionSets,
   ]);
 
   if (candidates.size < limit) {
-    candidates = intersectSets([
-      ...preferenceSets,
-      ...restrictionSets
-    ]);
+    candidates = intersectSets([...preferenceSets, ...restrictionSets]);
   }
 
   if (candidates.size < limit) {
-    candidates = unionSets([
-      ...preferenceSets,
-      ...restrictionSets
-    ]);
+    candidates = unionSets([...preferenceSets, ...restrictionSets]);
   }
 
   if (candidates.size < limit) {
     candidates = new Set(
-      Object.keys(indexes.recipeById).filter(id =>
-        !violatesRestrictions(id, userContext.restrictions, indexes)
-      )
+      Object.keys(indexes.recipeById).filter(
+        (id) => !violatesRestrictions(id, userContext.restrictions, indexes),
+      ),
     );
   }
 
   console.log("Candidate count:", candidates.size);
 
   const ranked = rankRecipes(
-    [...candidates].filter(id => indexes.recipeById?.[id]),
+    [...candidates].filter((id) => indexes.recipeById?.[id]),
     userContext,
-    indexes
+    indexes,
   );
 
-  return ranked.slice(0, limit).map(item => ({
+  return ranked.slice(0, limit).map((item) => ({
     ...item,
-    explanation: explainRecipe(item.recipeId, userContext, indexes)
+    explanation: explainRecipe(item.recipeId, userContext, indexes),
   }));
 }

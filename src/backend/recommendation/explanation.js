@@ -13,12 +13,24 @@ export function explainRecipe(recipeId, userContext, indexes) {
     reasons.push(`high in protein (${recipe.protein}g)`);
   }
 
-  if (userContext.budget === "cheap" && recipe.estimatedCost < 2) {
-    reasons.push("budget-friendly");
+  if (userContext.budget) {
+    if (userContext.budget === "cheap" && recipe.estimatedCost < 2) {
+      reasons.push("budget-friendly");
+    } else if (userContext.budget === "moderate" && recipe.estimatedCost >= 2 && recipe.estimatedCost < 5) {
+      reasons.push("moderately priced");
+    } else if (userContext.budget === "expensive" && recipe.estimatedCost >= 5) {
+      reasons.push("premium cost");
+    }
   }
 
-  if (userContext.caloriePref === "low" && recipe.calories < 400) {
-    reasons.push("low calorie");
+  if (userContext.caloriePref) {
+    if (userContext.caloriePref === "low" && recipe.calories < 300) {
+      reasons.push("low calorie");
+    } else if (userContext.caloriePref === "medium" && recipe.calories >= 300 && recipe.calories < 700) {
+      reasons.push("medium calorie");
+    } else if (userContext.caloriePref === "high" && recipe.calories >= 700) {
+      reasons.push("high calorie");
+    }
   }
 
   if (!reasons.length) {

@@ -76,8 +76,11 @@ function Profile() {
   // Handlers
   // -------------------------
   const handleUserChange = (e) => {
-    const { name, value } = e.target;
-    setUser((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setUser((prev) => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   const handleGoalChange = (e) => {

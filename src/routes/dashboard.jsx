@@ -35,6 +35,9 @@ function Dashboard() {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // call recommendation API to get top recipe for this mealtime
+  const [chosenRecipe, setChosenRecipe] = useState(null);
+  
   // hook to fetch recipes and user profile on mount
   useEffect(() => {
     const fetchRecipes = fetch(`/api/${apiEndpoint}`) 
@@ -66,8 +69,6 @@ function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  // call recommendation API to get top recipe for this mealtime
-  const [chosenRecipe, setChosenRecipe] = useState(null);
   useEffect(() => {
     if (recipes.length === 0) return;
 

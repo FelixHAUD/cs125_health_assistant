@@ -87,10 +87,10 @@ function Profile() {
     setUser((prev) => ({ ...prev, goal: e.target.value }));
   };
 
-  const handleDietaryChange = (e) => {
-    const selected = Array.from(e.target.selectedOptions, (o) => o.value);
-    setUser((prev) => ({ ...prev, dietaryRestrictions: selected }));
-  };
+  // const handleDietaryChange = (e) => {
+  //   const selected = Array.from(e.target.selectedOptions, (o) => o.value);
+  //   setUser((prev) => ({ ...prev, dietaryRestrictions: selected }));
+  // };
 
   const handleSave = () => {
     setSaving(true);

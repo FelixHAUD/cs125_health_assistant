@@ -49,6 +49,12 @@ footer {
   color: #666666;
 }
 
+hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 1rem 0;
+}
+
 main {
   flex: 1;
   display: flex;
@@ -123,6 +129,12 @@ h4 {
 
 .db-name {
   font-size: 1.25rem;
+}
+
+.logo-title {
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-weight: 999;
 }
 
 /* Profile */

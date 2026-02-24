@@ -1,3 +1,19 @@
 nav {
   align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.links {
+  display: flex;
+  gap: 2rem;
+}
+
+.logo-title {
+  background: linear-gradient(90deg, #a02273, #ee4123, #f89820);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  display: inline-block;
+  font-weight: bold;
 }

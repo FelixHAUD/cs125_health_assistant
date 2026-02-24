@@ -9,13 +9,16 @@ export default function Navbar() {
       <Link to="/" style={{ fontWeight: 'bold', fontSize: '1.5rem', display: 'flex', alignItems: 'center' }}>
         {/* <MdHealthAndSafety style={{ marginRight: '0.5rem', fontSize: '2rem' }} /> */}
         <img src="/NUTRILIFE.png" style={{height: '2rem', marginRight: '0.5rem'}}/>
-        <span>NutriLife</span>
+        <span className="logo-title">NutriLife</span>
       </Link>
     
-      <Link to="/">Dashboard</Link>
-      <Link to="/log">Log</Link>
-      <Link to="/profile">Profile</Link>
-      <Link to="/search">Search</Link>
+      <div className='links'>
+        <Link to="/">Dashboard</Link>
+        <Link to="/about">About</Link>
+        <Link to="/log">Log</Link>
+        <Link to="/profile">Profile</Link>
+        <Link to="/search">Search</Link>
+      </div>
     </nav>
   );
 }

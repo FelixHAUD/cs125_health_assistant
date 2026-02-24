@@ -8,6 +8,7 @@ export default function Layout() {
       <main className="page-content">
         <Outlet />
       </main>
+      <hr />
       <footer>
         Copyright © 2026 Felix Hallmann, Tyler Thiem & Ethan Yim. For CS 125 at UC Irvine.
       </footer>

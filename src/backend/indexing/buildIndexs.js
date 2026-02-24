@@ -10,6 +10,9 @@ import {
   costBucket,
   estimateRecipeCost,
   tokenizeIngredients,
+  inferCuisineType,
+  inferHealthLevel,
+  inferDishType,
 } from "./indexUtils.js";
 
 // ---- Load data ----
@@ -54,6 +57,7 @@ prices.forEach((item) => {
 // ---- Index containers ----
 const indexes = {
   mealType: {},
+  dishType: {},
   dietaryTags: {},
   costBucket: {},
   prepTimeBucket: {},
@@ -63,6 +67,8 @@ const indexes = {
   ingredientIndex: {},
   ingredientIdf: {},
   ingredientTfidf: {},
+  cuisineType: {},
+  healthLevel: {},
 };
 
 // ---- TF-IDF temp containers ----
@@ -121,7 +127,25 @@ recipes.forEach((recipe) => {
     const protBucket = proteinBucket(nutrition.protein);
     indexes.proteinBucket[protBucket] ??= [];
     indexes.proteinBucket[protBucket].push(id);
+
+    const health = inferHealthLevel(nutrition.calories, nutrition.protein);
+    indexes.recipeById[id].healthLevel = health;
+
+    indexes.healthLevel[health] ??= [];
+    indexes.healthLevel[health].push(id);
   }
+  const dishType = inferDishType(recipe.Title, recipe.Ingredients);
+
+  indexes.dishType[dishType] ??= [];
+  indexes.dishType[dishType].push(id);
+
+  indexes.recipeById[id].dishType = dishType;
+
+  const cuisine = inferCuisineType(recipe.Ingredients);
+  indexes.recipeById[id].cuisineType = cuisine;
+
+  indexes.cuisineType[cuisine] ??= [];
+  indexes.cuisineType[cuisine].push(id);
 
   const tokens = tokenizeIngredients(recipe.Ingredients);
   const tf = {};

@@ -66,7 +66,6 @@ export function inferDietaryTags(ingredientsText) {
     text.includes("turkey");
 
   if (!hasMeat) tags.push("vegetarian");
-  if (hasMeat) tags.push("high_protein");
   if (!text.includes("flour") && !text.includes("bread"))
     tags.push("gluten_free");
 
@@ -109,4 +108,57 @@ export function tokenizeIngredients(text) {
     .replace(/[^a-z\s]/g, "")
     .split(/\s+/)
     .filter(w => w.length > 2);
+}
+
+export function inferCuisineType(ingredients) {
+  const text = (Array.isArray(ingredients) ? ingredients.join(" ") : ingredients).toLowerCase();
+
+  if (text.match(/soy sauce|ginger|sesame|rice vinegar|bok choy/)) return "Asian";
+  if (text.match(/olive oil|basil|parmesan|oregano|pasta/)) return "Italian";
+  if (text.match(/tortilla|cumin|chili|cilantro|lime/)) return "Mexican";
+  if (text.match(/butter|cream|thyme|shallot/)) return "French";
+  if (text.match(/garam masala|turmeric|curry powder/)) return "Indian";
+
+  return "General";
+}
+
+export function inferHealthLevel(calories, protein) {
+  if (calories == null) return "unknown";
+
+  if (calories < 400) return "light";
+  if (calories < 700 || protein >= 20) return "balanced";
+
+  return "indulgent";
+}
+
+export function inferDishType(title, ingredientsText) {
+  const t = title.toLowerCase();
+  const i = ingredientsText.toLowerCase();
+
+  if (
+    t.includes("cake") ||
+    t.includes("cookie") ||
+    t.includes("dessert") ||
+    i.includes("sugar") && i.includes("flour")
+  ) return "dessert";
+
+  if (
+    t.includes("salad") ||
+    t.includes("side") ||
+    t.includes("fries")
+  ) return "side";
+
+  if (
+    t.includes("smoothie") ||
+    t.includes("drink") ||
+    t.includes("juice")
+  ) return "drink";
+
+  if (
+    t.includes("snack") ||
+    t.includes("bar") ||
+    t.includes("bite")
+  ) return "snack";
+
+  return "main";
 }

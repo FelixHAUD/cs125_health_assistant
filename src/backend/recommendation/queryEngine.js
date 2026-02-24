@@ -8,93 +8,137 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const indexesPath = path.join(__dirname, "../indexing/indexes.json");
-
-const indexes = JSON.parse(fs.readFileSync(indexesPath, "utf-8"));
+let indexes = JSON.parse(fs.readFileSync(indexesPath, "utf-8"));
 
 function violatesRestrictions(recipeId, restrictions, indexes) {
-  if (!restrictions || restrictions.length === 0) return false;
+  if (!Array.isArray(restrictions) || restrictions.length === 0) return false;
 
-  return restrictions.some(r =>
-    !indexes.dietaryTags[r]?.includes(recipeId)
-  );
+  return restrictions.some((r) => {
+    const allowed = indexes.dietaryTags?.[r];
+    return Array.isArray(allowed) && !allowed.includes(recipeId);
+  });
+}
+
+function intersectSets(sets) {
+  if (!sets.length) return new Set();
+
+  let result = new Set(sets[0]);
+  for (let i = 1; i < sets.length; i++) {
+    const next = new Set(sets[i]);
+    result = new Set([...result].filter((id) => next.has(id)));
+    if (result.size === 0) break;
+  }
+  return result;
+}
+
+function unionSets(sets) {
+  const result = new Set();
+  for (const s of sets) {
+    for (const id of s) result.add(id);
+  }
+  return result;
 }
 
 export function getRecommendations(userContext, limit = 10) {
-  let candidateSets = [];
+  const ingredientSets = [];
+  const preferenceSets = [];
+  const restrictionSets = [];
 
-  if (userContext.ingredients?.length) {
-    userContext.ingredients.forEach(term => {
+  if (Array.isArray(userContext.ingredients)) {
+    for (const term of userContext.ingredients) {
       const ids = indexes.ingredientIndex?.[term.toLowerCase()];
-      if (ids) candidateSets.push(ids);
-    });
+      if (Array.isArray(ids) && ids.length) {
+        ingredientSets.push(new Set(ids));
+      }
+    }
   }
 
   if (userContext.mealType) {
-    candidateSets.push(indexes.mealType[userContext.mealType] || []);
+    preferenceSets.push(
+      new Set(indexes.mealType?.[userContext.mealType] || []),
+    );
   }
 
   if (userContext.budget) {
-    candidateSets.push(indexes.costBucket[userContext.budget] || []);
+    preferenceSets.push(
+      new Set(indexes.costBucket?.[userContext.budget] || []),
+    );
   }
 
   if (userContext.caloriePref) {
-    candidateSets.push(indexes.calorieBucket[userContext.caloriePref] || []);
-  }
-
-  if (userContext.goals?.includes("high_protein")) {
-    candidateSets.push(indexes.proteinBucket["high"] || []);
-  }
-  if (userContext.goals?.includes("low_protein")) {
-    candidateSets.push(indexes.proteinBucket["low"] || []);
-  }
-  if (userContext.goals?.includes("medium_protein")) {
-      candidateSets.push(indexes.proteinBucket["medium"] || []);
-    }
-  if (userContext.restrictions?.length) {
-    userContext.restrictions.forEach(r => {
-      candidateSets.push(indexes.dietaryTags[r] || []);
-    });
-  }
-
-  let candidateIds = [];
-
-  if (candidateSets.length) {
-    candidateIds = intersectSets(candidateSets);
-  }
-
-  // Loosen until 10 options
-  if (candidateIds.length < limit) {
-    const nonIngredientSets = candidateSets.slice(
-      userContext.ingredients?.length || 0
+    preferenceSets.push(
+      new Set(indexes.calorieBucket?.[userContext.caloriePref] || []),
     );
-    candidateIds = intersectSets(nonIngredientSets);
   }
 
-  if (candidateIds.length < limit) {
-    if (userContext.mealType) {
-      candidateIds = indexes.mealType[userContext.mealType] || [];
+  if (userContext.healthLevel) {
+    preferenceSets.push(
+      new Set(indexes.healthLevel?.[userContext.healthLevel] || []),
+    );
+  }
+
+  if (userContext.cuisineType) {
+    preferenceSets.push(
+      new Set(indexes.cuisineType?.[userContext.cuisineType] || []),
+    );
+  }
+
+  if (userContext.dishType) {
+    preferenceSets.push(
+      new Set(indexes.dishType?.[userContext.dishType] || []),
+    );
+  }
+
+  if (Array.isArray(userContext.goals)) {
+    if (userContext.goals.includes("high_protein")) {
+      preferenceSets.push(new Set(indexes.proteinBucket?.high || []));
+    } else if (userContext.goals.includes("medium_protein")) {
+      preferenceSets.push(new Set(indexes.proteinBucket?.medium || []));
+    } else if (userContext.goals.includes("low_protein")) {
+      preferenceSets.push(new Set(indexes.proteinBucket?.low || []));
     }
   }
 
-  if (candidateIds.length < limit) {
-    candidateIds = Object.keys(indexes.recipeById);
+  if (Array.isArray(userContext.restrictions)) {
+    for (const r of userContext.restrictions) {
+      restrictionSets.push(new Set(indexes.dietaryTags?.[r] || []));
+    }
   }
 
-  console.log("Candidate count:", candidateIds.length);
+  let candidates = new Set();
 
-  const ranked = rankRecipes(candidateIds, userContext, indexes);
+  candidates = intersectSets([
+    ...ingredientSets,
+    ...preferenceSets,
+    ...restrictionSets,
+  ]);
 
-  return ranked.slice(0, limit).map(item => ({
-    ...item,
-    explanation: explainRecipe(item.recipeId, userContext, indexes)
-  }));
-}
+  if (candidates.size < limit) {
+    candidates = intersectSets([...preferenceSets, ...restrictionSets]);
+  }
 
+  if (candidates.size < limit) {
+    candidates = unionSets([...preferenceSets, ...restrictionSets]);
+  }
 
+  if (candidates.size < limit) {
+    candidates = new Set(
+      Object.keys(indexes.recipeById).filter(
+        (id) => !violatesRestrictions(id, userContext.restrictions, indexes),
+      ),
+    );
+  }
 
-function intersectSets(arrays) {
-  if (arrays.length === 0) return [];
-  return arrays.reduce((acc, curr) =>
-    acc.filter(id => curr.includes(id))
+  console.log("Candidate count:", candidates.size);
+
+  const ranked = rankRecipes(
+    [...candidates].filter((id) => indexes.recipeById?.[id]),
+    userContext,
+    indexes,
   );
+
+  return ranked.slice(0, limit).map((item) => ({
+    ...item,
+    explanation: explainRecipe(item.recipeId, userContext, indexes),
+  }));
 }

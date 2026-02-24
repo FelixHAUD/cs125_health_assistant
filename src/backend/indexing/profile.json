@@ -4,11 +4,14 @@
     "age": "21",
     "heightFt": 5,
     "heightIn": "10",
-    "weight": "115",
-    "goal": "I want to gain muscle (and weight along with that).",
+    "weight": "160",
+    "goal": "I want to lose weight and become more lean.",
     "budget": "moderate",
-    "caloriePref": "high",
-    "highProtein": false
+    "caloriePref": "medium",
+    "healthLevel": "indulgent",
+    "dietaryRestrictions": [
+      "vegan"
+    ]
   },
   "vitals": {
     "heartrate": 72,

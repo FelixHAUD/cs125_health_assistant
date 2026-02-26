@@ -8,7 +8,25 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const indexesPath = path.join(__dirname, "../indexing/indexes.json");
+const mealsPath = path.join(__dirname, "../indexing/meals.json");
+let meals = JSON.parse(fs.readFileSync(mealsPath, "utf-8"));
 let indexes = JSON.parse(fs.readFileSync(indexesPath, "utf-8"));
+let mealsReloadTimer = null;
+
+//Watch for meal logs.
+function reloadMeals() {
+  try {
+    const raw = fs.readFileSync(mealsPath, "utf-8");
+    meals = JSON.parse(raw);
+    console.log("Reloaded meals.json:", meals.length);
+  } catch (err) {
+    console.error("Failed to reload meals.json:", err);
+  }
+}
+fs.watch(mealsPath, (eventType) => {
+  clearTimeout(mealsReloadTimer);
+  mealsReloadTimer = setTimeout(reloadMeals, 100);
+});
 
 function violatesRestrictions(recipeId, restrictions, indexes) {
   if (!Array.isArray(restrictions) || restrictions.length === 0) return false;
@@ -135,6 +153,7 @@ export function getRecommendations(userContext, limit = 10) {
     [...candidates].filter((id) => indexes.recipeById?.[id]),
     userContext,
     indexes,
+    meals,
   );
 
   return ranked.slice(0, limit).map((item) => ({

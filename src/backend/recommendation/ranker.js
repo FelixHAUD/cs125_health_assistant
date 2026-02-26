@@ -45,11 +45,28 @@ function cosineSimilarity(queryVec, queryNorm, docVec) {
   if (queryNorm === 0 || docNorm === 0) return 0;
   return dot / (queryNorm * docNorm);
 }
+function buildLoggedMealTitleCounts(mealsData) {
+  const counts = Object.create(null);
+  if (!Array.isArray(mealsData)) return counts;
 
-export function rankRecipes(recipeIds, userContext, indexes) {
+  for (const e of mealsData) {
+    const title = String(e?.meal ?? "").toLowerCase().trim();
+    if (!title) continue;
+    counts[title] = (counts[title] ?? 0) + 1;
+  }
+  return counts;
+}
+export function rankRecipes(recipeIds, userContext, indexes, meals) {
   const hasIngredients = Array.isArray(userContext.ingredients) && userContext.ingredients.length > 0;
   const queryVec = hasIngredients ? buildQueryVector(userContext.ingredients, indexes) : null;
   const queryNorm = queryVec ? vectorNorm(queryVec) : 0;
+
+  const loggedTitleCounts = buildLoggedMealTitleCounts(meals);
+  //Add boost based on how many times a recipe title has been logged in the user's meal history, 
+  // using a logarithmic scale to prevent excessive boosting
+  const LOGGED_BASE_BOOST = 0.25;  
+  const LOGGED_COUNT_SCALE = 0.1;  
+  const LOGGED_MAX_EXTRA = 0.5;
 
   return recipeIds
     .map((id) => {
@@ -75,6 +92,14 @@ export function rankRecipes(recipeIds, userContext, indexes) {
         const sim = cosineSimilarity(queryVec, queryNorm, docVec);
         score += sim * 0.5; 
       }
+
+      const titleKey = String(recipe?.title ?? "").toLowerCase().trim();
+      const loggedCount = titleKey ? (loggedTitleCounts[titleKey] ?? 0) : 0;
+      if (loggedCount > 0) {
+        const extra = Math.min(LOGGED_MAX_EXTRA, Math.log1p(loggedCount) * LOGGED_COUNT_SCALE);
+        score += LOGGED_BASE_BOOST + extra;
+      }
+
       return { recipeId: id, recipeTitle: recipe.title, score };
     })
     .sort((a, b) => b.score - a.score);
